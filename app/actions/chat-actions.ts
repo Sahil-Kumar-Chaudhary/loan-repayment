@@ -3,11 +3,12 @@
 import { GoogleGenerativeAI } from "@google/generative-ai"
 import { calculateEMI, calculateTotalInterest } from "../utils/loan-calculator"
 
-// Initialize the Google Generative AI client with API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+import { getGeminiClient } from "@/lib/gemini"
 
 export async function generateChatResponse(messages: { role: string; content: string }[]) {
   try {
+    const genAI = getGeminiClient()
+
     // Get the last user message
     const lastUserMessage = messages.filter((m) => m.role === "user").pop()
 
@@ -81,15 +82,18 @@ Be helpful, concise, and friendly.
   // Use gemini-pro (most stable and widely available model)
   let text = ""
     try {
-      const modelInstance = genAI.getGenerativeModel({ 
-        model: "gemini-2.0-flash",
-        generationConfig: {
-          temperature: 0.7,
-          topP: 0.8,
-          topK: 40,
-          maxOutputTokens: 400,
-        }
-      })
+      const modelInstance = genAI.getGenerativeModel(
+        { 
+          model: "gemini-2.5-flash",
+          generationConfig: {
+            temperature: 0.7,
+            topP: 0.8,
+            topK: 40,
+            maxOutputTokens: 400,
+          }
+        },
+        { apiVersion: "v1" }
+      )
       
       // Try chat flow first
       try {

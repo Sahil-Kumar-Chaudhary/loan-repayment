@@ -1,11 +1,11 @@
 import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
 
-// Initialize the Google Generative AI client
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+import { getGeminiClient } from "@/lib/gemini"
 
 export async function POST(req: Request) {
   try {
+    const genAI = getGeminiClient()
     const { messages } = await req.json()
 
     // Get the last user message
@@ -18,16 +18,7 @@ export async function POST(req: Request) {
     // Log the request for debugging
     console.log("Processing chat request with message:", lastUserMessage.content)
 
-    // List available models to help with debugging
-    try {
-      const modelList = await genAI.listModels()
-      console.log(
-        "Available models:",
-        modelList.models.map((m) => m.name),
-      )
-    } catch (listError) {
-      console.error("Error listing models:", listError)
-    }
+    // Removed listModels debugging logic as it causes TS errors with the current SDK
 
     // Create a prompt that includes context from previous messages
     let prompt = `You are LoanAI Assistant, a helpful AI loan assistant for a loan repayment website. 
@@ -56,16 +47,19 @@ export async function POST(req: Request) {
     // Add the current user question
     prompt += `User: ${lastUserMessage.content}\nAssistant: `
 
-    // Get the Gemini model - try with gemini-1.0-pro which should be widely available
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.0-pro",
-      generationConfig: {
-        temperature: 0.7,
-        topP: 0.8,
-        topK: 40,
-        maxOutputTokens: 1024,
+    // Get the Gemini model - Use gemini-2.5-flash as verified by the test endpoint
+    const model = genAI.getGenerativeModel(
+      {
+        model: "gemini-2.5-flash",
+        generationConfig: {
+          temperature: 0.7,
+          topP: 0.8,
+          topK: 40,
+          maxOutputTokens: 1024,
+        },
       },
-    })
+      { apiVersion: "v1" }
+    )
 
     // Generate content with a single prompt approach
     const result = await model.generateContent(prompt)

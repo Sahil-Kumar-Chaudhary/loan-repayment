@@ -1,10 +1,8 @@
 "use server"
 
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { getGeminiClient } from "@/lib/gemini"
 import { Loan } from "../../lib/loan-store"
-
-// Initialize the Google Generative AI client with API key
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
 
 export interface AIRecommendation {
   id: number
@@ -18,8 +16,11 @@ export interface AIRecommendation {
 
 export async function generateLoanRecommendations(loans: Loan[]): Promise<AIRecommendation[]> {
   try {
-    // Create a model instance
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" })
+    const genAI = getGeminiClient()
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-2.5-flash" },
+      { apiVersion: "v1" }
+    )
     
     // Prepare loan data for the AI
     const loanDetails = loans.map(loan => {

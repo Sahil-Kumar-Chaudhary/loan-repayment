@@ -1,17 +1,18 @@
 "use server"
 
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { getGeminiClient } from "@/lib/gemini"
 
 export async function testGeminiConnection() {
   try {
     // Initialize the Google Generative AI client
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+    const genAI = getGeminiClient()
 
-    // Get the model - using gemini-1.5-flash with explicit API version
-    const model = genAI.getGenerativeModel({
-      model: "gemini-1.5-flash",
-      apiVersion: "v1", // Explicitly set API version to v1 instead of v1beta
-    })
+    // Get the model - using gemini-2.5-flash with explicit API version
+    const model = genAI.getGenerativeModel(
+      { model: "gemini-2.5-flash" },
+      { apiVersion: "v1" } // Explicitly set API version to v1 instead of v1beta
+    )
 
     // Generate a simple response
     const result = await model.generateContent("Say hello and confirm you are working correctly")

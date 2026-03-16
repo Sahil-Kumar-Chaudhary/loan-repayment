@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server"
 import { GoogleGenerativeAI } from "@google/generative-ai"
+import { getGeminiClient } from "@/lib/gemini"
 
 export async function GET() {
   try {
-    // Initialize the Google Generative AI client
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "")
+    // Initialize the Gemini client using the key rotater
+    const genAI = getGeminiClient()
 
   // Use only the working model provided by the user
   const geminiModel = genAI.getGenerativeModel({ model: "gemini-2.5-flash" }, { apiVersion: "v1" })
